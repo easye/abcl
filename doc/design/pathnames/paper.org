@@ -1,4 +1,5 @@
-* "Write a paper on the ABCL Pathname implementation"
+#+TITLE: Design and Implementation of the ABCL PATHNAME
+* The ABCL PATHNAME Implementation
 
 ** Needs within ABCL
 
@@ -6,19 +7,22 @@
 "vaguely", I want to replace org.lisp.armedbear.Pathname with some
 sort of abstraction that allows easier maintainence and understanding of the code.
 
-cl:logical-pathname a cl:pathname
+#+begin_example
+cl:logical-pathname  a cl:pathname
+ext:url-pathname     a cl:pathname
+ext:jar-pathname     a ext:url-pathname
 
-ext:uri-pathname a cl:pathname
-
-ext:jar-pathname a ext:uri-pathname
+#+end_example
 
 We naively begin by attempting to outline reasons one can't replace with an interface.
 
 **** constructors
 
+These would be present for all =ext:url-pathname= 
+
 #+BEGIN_SRC java
      new Pathname(namestring)
-#+#END_SRC
+#+END_SRC
 
 #+BEGIN_SRC java
     Pathname Pathname.create(namestring)
@@ -27,17 +31,133 @@ We naively begin by attempting to outline reasons one can't replace with an inte
 Use Builder or Factory?
 <http://stackoverflow.com/questions/757743/what-is-the-difference-between-builder-design-pattern-and-factory-design-pattern>
 
-Try Builder so we can do stuff like
+Decide to use Builder so we can do stuff like.
 
-#+BEGIN_SRC java
+#+begin_src java
       Pathname result = new PathnameBuilder()
         .setDirectory("/foo/bar/")
         .setName("baz")
         .setType("bat").build();
+#+end_src
+
+In any event, the Pathname constructors would be deprecated, and perhaps made =private=.
 
 
-**** Encapsulate fields with getter/setters
+**** DONE Encapsulate fields with getter/setters
+     CLOSED: [2020-06-19 Fri 17:42]
 
+     - CLOSING NOTE [2020-06-19 Fri 17:42] \\
+       Done in pathname-2-build.patch
 **** TODO cache result of calling Namestring
 
+
+** Description of Current Problems
+
+As noted from <[[file:jar-pathnames.markdown][file:./jar-pathnames.markdown]]>.
+
+Goals:
+
+1.  All objects descending from =URL-PATHNAME= can roundtrip their namestring().
+
+2.  Able to represent archives within archives abitrarily.
+
+*** TODO Figure out what the class hierarchy 
+
+Figure the hierarchy out abstractly, and then concretely in Java and Lisp.
+
+Idea:  use =DEVICE= components to represent a pathname
+
+#+NAME: Example of an archive in an archive
+#+begin_example
+jar:jar:file:~/work/abcl/dist/abcl.jar!/something.abcl!/__loader__._
+#+end_example
+
+#+NAME: 
+#+begin_example
+[jar:file:/tmp/foo.jar!/] 
+  ^--has-device-- [jar:file:a/path/something.abcl!/] 
+      ^--has-device-- [/__loader__._]
+#+end_example
+
+All the following pathnames should be valid.
+#+begin_example
+#p"file:/tmp/foo.jar" 
+#p"jar:file:/tmp/foo.jar!/"
+#p"jar:file:/tmp/foo.jar!/a/path/something.abcl"
+#p"jar:file:/tmp/foo.jar!/a/path/something.abcl!/"
+#p"jar:file:/tmp/foo.jar!/a/path/something.abcl!/__loader__._"
+#+end_example
+
+
+
+
+#+NAME: Parsing the namestring 
+#+begin_src lisp
+(pathname "jar:jar:file:~/work/abcl/dist/abcl.jar!/something.abcl!/__loader__._")
+#+end_src
+
+would create three pathnames:
+
+#+begin_src lisp
+  #1# #p(:device #2# :name "__loader__" :type "_")
+
+  #2# #p(:device #3#: :name "something" :type "abcl"
+                 :directory (:absolute))
+
+  #3# #p(:device nil :name "abcl" :type "jar"
+         :directory (:(:absolute (user-homedir) "work" "abcl" "dist")))                              
+#+end_src
+
+| reference | namestring                                                         |
+|-----------+--------------------------------------------------------------------|
+| #1#       | jar:jar:file:/tmp/abcl/dist/abcl.jar!/something.abcl!/__loader__._ |
+| #2#       | jar:file:/tmp/abcl/dist/abcl.jar!/something.abcl                   |
+| #3#       | file:/tmp/abcl/dist/abcl.jar                                       |
+
+#3# has to have a device of nil in order to be a DOS drive letter under Windows.
+
+Problems:
+
+#3# is both a file and an archive source.  The namestring of #2#
+encapsulates this, but a naked reference to #3# should be able to be
+target of a DIRECTORY operation? 
+
+No, there is a difference between 
+
+| namestring                         | type |
+|------------------------------------+------|
+| jar:file:/tmp/abcl/dist/abcl.jar!/ |      |
+| file:/tmp/abcl/dist/abcl.jar       |      |
+
+#+name: Not a good idea?
+#+begin_src 
+(directory #p"file:/tmp/abcl/dist/abcl.jar")
+#+end_src
+
+We already have problems with files v. directories in Common Lisp.
+
+Introduce a new function?
+
+#+begin_src 
+(archive-directory #p"file:/tmp/abcl/dist/abcl.jar")
+#+end_src
+
+
+*** TODO Fix the representation in CL:PATHNAME of objects to reflect this hierarchy.
+
+
+*** TODO Refactor the Java 
+
+Use Factory pattern.  Don't use constructors, but rather
+Pathname.create() calls, which may chained.  Misnamed:  should be Pathname.add()?
+
+Untable
+
+
+* Colophon
+  #+begin_example
+  Mark Evenson  
+  Created: 2010
+  Revised: <2020-06-19 Fri 17:50>
+  #+end_example
 
