@@ -41,3 +41,77 @@ Try Builder so we can do stuff like
 **** TODO cache result of calling Namestring
 
 
+** Description of Current Problems
+
+As noted from <[[file:jar-pathnames.markdown][file:~/work/abcl/doc/design/pathnames/jar-pathnames.markdown]]> 
+
+Goals:
+
+1.  All objects descending from URL-PATHNAME can roundtrip their namestring().
+
+2.  Able to represent archives within archives abitrarily.
+
+*** TODO Figure out what the class hierarchy 
+
+Figure the hierarchy out abstractly, and then concretely in Java and Lisp.
+
+Idea:  use DEVICE components to mark an archive
+
+[/tmp/foo.jar] <--has-device-- [a/path/something.abcl] <--has-device-- [/__loader__._]
+
+#+name: Example of an archive in an archive
+#+begin_example
+jar:jar:file:~/work/abcl/dist/abcl.jar!/something.abcl!/__loader__._
+#+end_example
+
+#+name: Parsing the namestring 
+#+begin_src lisp
+(pathname "jar:jar:file:~/work/abcl/dist/abcl.jar!/something.abcl!/__loader__._")
+#+end_src
+
+would create three pathnames:
+
+#+begin_src lisp
+  #1# #p(:device #2# :name "__loader__" :type "_")
+
+  #2# #p(:device #3#: :name "something" :type "abcl"
+                 :directory (:absolute))
+
+  #3# #p(:device :archive :name "abcl" :type "jar"
+         :directory (:(:absolute (user-homedir) "work" "abcl" "dist")))                              
+#+end_src
+
+
+| #1# | jar:jar:file:/tmp/abcl/dist/abcl.jar!/something.abcl!/__loader__._ |
+| #2# | jar:file:/tmp/abcl/dist/abcl.jar!/something.abcl                   |
+| #3# | file:/tmp/abcl/dist/abcl.jar                                       |
+
+Problems:
+
+#3# is both a file and an archive source.  The namestring of #2#
+encapsulates this, but a naked reference to #3# should be able to be
+target of a DIRECTORY operation?
+
+#+name: Not a good idea?
+#+begin_src 
+(directory #p"file:/tmp/abcl/dist/abcl.jar")
+#+end_src
+
+We already have problems with files v. directories in Common Lisp.
+
+Introduce a new function?
+
+#+begin_src 
+(archive-directory #p"file:/tmp/abcl/dist/abcl.jar")
+#+end_src
+
+
+*** TODO Fix the representation in CL:PATHNAME of objects to reflect this hierarchy.
+
+
+*** TODO Refactor the Java 
+
+Use Factory pattern.  Don't use constructors, but rather
+Pathname.create() calls, which may chained.  Misnamed:  should be Pathname.add()?
+
+Untable
