@@ -57,6 +57,14 @@ public final class LogicalPathname extends Pathname
     return false;
   }
 
+  protected LogicalPathname() {
+  }
+  
+  // Used in Pathname._makePathname to indicate type for namestring 
+  public static LogicalPathname create() {
+    return new LogicalPathname();
+  }
+
   public static LogicalPathname create(String namestring) {
     // parse host out then call create(host, rest);
     if (LogicalPathname.isValidLogicalPathname(namestring)) {
