@@ -1378,9 +1378,9 @@ public final class Lisp
       LispObject truenameFasl = Symbol.LOAD_TRUENAME_FASL.symbolValue(thread);
       LispObject truename = Symbol.LOAD_TRUENAME.symbolValue(thread);
       if (truenameFasl instanceof Pathname) {
-          load = Pathname.mergePathnames(name, (Pathname)truenameFasl, Keyword.NEWEST);
+          load = Pathname.mergePathnames(name, (Pathname)truenameFasl);
       } else if (truename instanceof Pathname) {
-          load = Pathname.mergePathnames(name, (Pathname)truename, Keyword.NEWEST);
+          load = Pathname.mergePathnames(name, (Pathname)truename);
       } else {
         if (!Symbol.PROBE_FILE.execute(name).equals(NIL)) {
           load = name;

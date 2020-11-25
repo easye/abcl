@@ -1663,14 +1663,14 @@ public class Pathname extends LispObject
           Pathname pathname = coerceToPathname(arg);
           Pathname defaultPathname
             = coerceToPathname(Symbol.DEFAULT_PATHNAME_DEFAULTS.symbolValue());
-          LispObject defaultVersion = Keyword.NEWEST;
+          LispObject defaultVersion = NIL;
           return mergePathnames(pathname, defaultPathname, defaultVersion);
         }
         @Override
         public LispObject execute(LispObject first, LispObject second) {
             Pathname pathname = coerceToPathname(first);
             Pathname defaultPathname = coerceToPathname(second);
-            LispObject defaultVersion = Keyword.NEWEST;
+            LispObject defaultVersion = NIL;
             return mergePathnames(pathname, defaultPathname, defaultVersion);
         }
         @Override
@@ -1684,7 +1684,7 @@ public class Pathname extends LispObject
     }
 
   public static final Pathname mergePathnames(Pathname pathname, Pathname defaultPathname) {
-    return mergePathnames(pathname, defaultPathname, Keyword.NEWEST);
+    return mergePathnames(pathname, defaultPathname, NIL);
   }
     
   public static final Pathname mergePathnames(final Pathname pathname,
