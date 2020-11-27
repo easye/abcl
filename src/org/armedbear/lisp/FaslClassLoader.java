@@ -110,10 +110,10 @@ public class FaslClassLoader extends JavaClassLoader {
       LispObject truename = Symbol.LOAD_TRUENAME.symbolValue(thread);
       
       if (truenameFasl instanceof Pathname) {
-          return (Pathname.mergePathnames(name, (Pathname)truenameFasl, Keyword.NEWEST))
+          return (Pathname.mergePathnames(name, (Pathname)truenameFasl))
                     .getInputStream();
       } else if (truename instanceof Pathname) {
-          return (Pathname.mergePathnames(name, (Pathname) truename, Keyword.NEWEST))
+          return (Pathname.mergePathnames(name, (Pathname) truename))
                   .getInputStream();
       } else if (!Symbol.PROBE_FILE.execute(name).equals(NIL)) {
         return name.getInputStream();
