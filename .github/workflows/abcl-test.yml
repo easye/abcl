@@ -41,6 +41,32 @@ jobs:
       - name: Configure ASDF to find abcl
         run: bash -x ./ci/asdf-finds-abcl.bash
 
+      - name:  Install Jeannie for testing
+        run: bash -x ./ci/install-jeannie.bash
+
+      - name: Install the ANSI-TEST suite
+        run: bash -x ./ci/install-ansi-test.bash
+
+      - name: Install Quicklisp
+        run: ./abcl --eval '(require :asdf)' --eval '(require :abcl-contrib)' --eval '(asdf:load-system :quicklisp-abcl :force t)' --eval '(progn (setf ql-util::*do-not-prompt* t)(ql:add-to-init-file))' --eval '(ext:quit)'
+
+    test:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          include:
+          - jdk: "openjdk8"
+          - jdk: "openjdk11"
+          - jdk: "openjdk15"
+      steps:
+        - name: Test ABCL-PROVE
+          run: ./abcl --batch --load ./ci/test-abcl-prove.lisp
+          
+
+            
+
+
+
 
       
   
