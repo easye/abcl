@@ -4,11 +4,17 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    
+    strategy:
+      os: [ubuntu-latest, macos-latest]
+      matrix:
+        include:
+          - jdk: "openjdk8"
+          - jdk: "openjdk11"
+          - jdk: "openjdk15"
     steps:
       - name: Set path for build scripts
         run: echo "ABCL_ROOT=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+        run: echo "JDK_VERSION=${{ matrix.jdk }}" >> $GITHUB_ENV
 
       - name: Clone ABCL
         uses: actions/checkout@v2
@@ -22,10 +28,10 @@ jobs:
         run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl.diagnostic
         
       - name: Install AdoptJDK
-        run: bash -x ./ci/install-adoptjdk.bash openjdk8
+        run: bash -x ./ci/install-adoptjdk.bash ${JDK_VERSION}
 
       - name: Set abcl.properties for build
-        run: bash -x ./ci/create-abcl-properties.bash openjdk8
+        run: bash -x ./ci/create-abcl-properties.bash ${JDK_VERSION}
 
       - name: Build ABCL
         run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl
