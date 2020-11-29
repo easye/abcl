@@ -4,9 +4,8 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: [ubuntu-latest, macos-latest]
     strategy:
-      os: [ubuntu-latest, macos-latest]
       matrix:
         include:
           - jdk: "openjdk8"
