@@ -12,10 +12,10 @@ jobs:
 
   steps:
     - name: Clone ABCL
-      uses: actions/checkout@2
+      uses: actions/checkout@v2
 
     - name: Install Java base for Ant
-      uses: actions/setup-java@1
+      uses: actions/setup-java@v1
 
     - name: Install AdoptJDK
       run: bash -x ./ci/install-adoptjdk.bash openjdk8
