@@ -25,7 +25,7 @@ jobs:
         run: bash -x ./ci/create-abcl-properties.bash openjdk8
 
       - name: Build ABCL
-        run: ./ci/ensure-jenv-is-present && ant abcl
+        run: ./ci/ensure-jenv-is-present.bash && ant abcl
 
       - name: Configure ASDF to find abcl
         run: bash -x ./ci/asdf-finds-abcl.bash
