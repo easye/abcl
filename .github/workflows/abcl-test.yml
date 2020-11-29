@@ -1,0 +1,37 @@
+name: Test ABCL
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+  steps:
+    - name: Clone ABCL
+      uses: actions/checkout@2
+
+    - name: Install Java base for Ant
+      uses: actions/setup-java@1
+
+    - name: Install AdoptJDK
+      run: bash -x ./ci/install-adoptjdk.bash openjdk8
+
+    - name: Setup jenv
+      run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl.diagnostic
+
+    - name: Set abcl.properties for build
+      run: bash -x ./ci/create-abcl-properties.bash openjdk8
+
+    - name: Build ABCL
+      run: ./ci/ensure-jenv-is-present && ant abcl
+
+    - name: Configure ASDF to find abcl
+      run: bash -x ./ci/asdf-finds-abcl.bash
+
+
+      
+  
