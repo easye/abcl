@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Set path for build scripts
+        run: echo "ABCL_ROOT=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+
       - name: Clone ABCL
         uses: actions/checkout@v2
         
@@ -14,18 +17,18 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-        
-      - name: Install AdoptJDK
-        run: bash -x ./ci/install-adoptjdk.bash openjdk8
 
       - name: Setup jenv
         run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl.diagnostic
+        
+      - name: Install AdoptJDK
+        run: bash -x ./ci/install-adoptjdk.bash openjdk8
 
       - name: Set abcl.properties for build
         run: bash -x ./ci/create-abcl-properties.bash openjdk8
 
       - name: Build ABCL
-        run: ./ci/ensure-jenv-is-present.bash && ant abcl
+        run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl
 
       - name: Configure ASDF to find abcl
         run: bash -x ./ci/asdf-finds-abcl.bash
