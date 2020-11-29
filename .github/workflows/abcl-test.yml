@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Set path for build scripts
         run: echo "ABCL_ROOT=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+
+      - name: Set JDK version in environment
         run: echo "JDK_VERSION=${{ matrix.jdk }}" >> $GITHUB_ENV
 
       - name: Clone ABCL
