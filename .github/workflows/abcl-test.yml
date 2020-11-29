@@ -12,6 +12,8 @@ jobs:
         
       - name: Install Java base for Ant
         uses: actions/setup-java@v1
+        with:
+          java-version: 8
         
       - name: Install AdoptJDK
         run: bash -x ./ci/install-adoptjdk.bash openjdk8
