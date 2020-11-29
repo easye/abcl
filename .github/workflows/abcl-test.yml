@@ -36,7 +36,7 @@ jobs:
         run: bash -x ./ci/create-abcl-properties.bash ${JDK_VERSION}
 
       - name: Build ABCL
-        run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl
+        run: bash -x ./ci/ensure-jenv-is-present.bash && $HOME/.jenv/shims/ant abcl
 
       - name: Configure ASDF to find abcl
         run: bash -x ./ci/asdf-finds-abcl.bash
