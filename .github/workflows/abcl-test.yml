@@ -27,7 +27,7 @@ jobs:
           java-version: 8
 
       - name: Setup jenv
-        run: >-
+        run: >
           bash -x ./ci/ensure-jenv-is-present.bash
           && ant abcl.diagnostic
         
@@ -38,7 +38,7 @@ jobs:
         run: bash -x ./ci/create-abcl-properties.bash ${JDK_VERSION}
 
       - name: Build ABCL
-        run: >-
+        run: >
           bash -x ./ci/ensure-jenv-is-present.bash
           && $HOME/.jenv/shims/ant abcl
 
@@ -52,7 +52,7 @@ jobs:
         run: bash -x ./ci/install-ansi-test.bash
 
       - name: Install Quicklisp
-        run: >-
+        run: >
           ./abcl
             --eval '(require :asdf)'
             --eval '(require :abcl-contrib)'
