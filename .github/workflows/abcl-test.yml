@@ -27,7 +27,9 @@ jobs:
           java-version: 8
 
       - name: Setup jenv
-        run: bash -x ./ci/ensure-jenv-is-present.bash && ant abcl.diagnostic
+        run: >-
+          bash -x ./ci/ensure-jenv-is-present.bash
+          && ant abcl.diagnostic
         
       - name: Install AdoptJDK
         run: bash -x ./ci/install-adoptjdk.bash ${JDK_VERSION}
@@ -36,7 +38,9 @@ jobs:
         run: bash -x ./ci/create-abcl-properties.bash ${JDK_VERSION}
 
       - name: Build ABCL
-        run: bash -x ./ci/ensure-jenv-is-present.bash && $HOME/.jenv/shims/ant abcl
+        run: >-
+          bash -x ./ci/ensure-jenv-is-present.bash
+          && $HOME/.jenv/shims/ant abcl
 
       - name: Configure ASDF to find abcl
         run: bash -x ./ci/asdf-finds-abcl.bash
@@ -48,13 +52,37 @@ jobs:
         run: bash -x ./ci/install-ansi-test.bash
 
       - name: Install Quicklisp
-        run: ./abcl --eval '(require :asdf)' --eval '(require :abcl-contrib)' --eval '(asdf:load-system :quicklisp-abcl :force t)' --eval '(progn (setf ql-util::*do-not-prompt* t)(ql:add-to-init-file))' --eval '(ext:quit)'
+        run: >-
+          ./abcl
+            --eval '(require :asdf)'
+            --eval '(require :abcl-contrib)'
+            --eval '(asdf:load-system :quicklisp-abcl :force t)'
+            --eval '(progn (setf ql-util::*do-not-prompt* t)(ql:add-to-init-file))'
+            --eval '(ext:quit)'
 
       - name: Test ABCL-PROVE
         run: ./abcl --batch --load ./ci/test-abcl-prove.lisp
 
+      - name: Test STATIC-VECTORS
+        run: ./abcl --batch --load ./ci/test-static-vectors.lisp
+
+      - name: Test CFFI
+        run: ./abcl --batch --load ./ci/test-cffi.lisp
+
+      - name: Test CL+SSL
+        run: ./abcl --batch --load ./ci/test-cl+ssl.lisp
+
+      - name: Test ABCL-INTROSPECT
+        run: ./abcl --batch --load ./ci/test-abcl-introspect.lisp
+
+      - name: Test Jeannie
+        run: ./abcl --batch --load ./ci/test-jeannie.lisp
+
       - name: Test ABCL
         run: ./abcl --batch --load ./ci/test-abcl.lisp
+
+      - name: Test IRONCLAD
+        run: ./abcl --batch --load ./ci/test-ironclad.lisp
 
       - name: Run ANSI-TEST suite
         run: ./abcl --batch --load ./ci/test-ansi.lisp
