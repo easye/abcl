@@ -5,13 +5,12 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - jdk: "openjdk8"
-          - jdk: "openjdk11"
-          - jdk: "openjdk15"
+        os: [ubuntu-latest, macos-latest]
+        jdk: [openjdk8, openjdk11, openjdk15]
+        
     steps:
       - name: Set path for build scripts
         run: echo "ABCL_ROOT=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
