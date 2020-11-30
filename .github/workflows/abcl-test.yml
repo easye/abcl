@@ -1,16 +1,18 @@
-name: Test ABCL via GitHub actions
+name: Build and extensively test ABCL
 
 on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: $${ matrix.os }}
     strategy:
       matrix:
         include:
           - jdk: "openjdk8"
           - jdk: "openjdk11"
           - jdk: "openjdk15"
+        os: [ubuntu-latest, macos-latest, windows-latest]
+          
     steps:
       - name: Set path for build scripts
         run: echo "ABCL_ROOT=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
