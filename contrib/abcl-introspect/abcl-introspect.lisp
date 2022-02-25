@@ -356,12 +356,13 @@ above have used annotate local functions"
 ;; annotated when they are defined.
 
 (defmethod mop::add-direct-method :after (class method)
-  (annotate-clos-methods (list method))
-)
+  (annotate-clos-methods (list method)))
 
-(defmethod mop::ensure-class-using-class :after (class name  &key direct-slots
-                                             direct-default-initargs 
-                                             &allow-other-keys)
+(defmethod mop::ensure-class-using-class :after (class name
+                                                 &key direct-slots
+                                                   direct-default-initargs 
+                                                 &allow-other-keys)
+  (declare (ignore direct-slots direct-default-initargs))
   (annotate-clos-slots (mop::class-direct-slots (find-class name))))
 
 ;; Environments
@@ -438,22 +439,24 @@ above have used annotate local functions"
 ;; that case we get a concurrent modification exception as we iterate
 ;; through the iterator, when some other function call is made.
 
-(defun stack-to-list (stack)
-  (coerce (#"toArray" stack) 'list))
+;; BEGIN use  :abcl-introspect/system
+(in-package :abcl-introspect/system)
 
 (defun collapse-locals (thread)
-  (loop for bindings in (mapcar 'sys::environment-parts
-                                (stack-to-list (jss:get-java-field thread "envStack" t)))
-        with last-locals
-        with last-function
-        for binding = (car bindings)
-        if (eq (second binding) nil)
-          collect (prog1
-                      (list last-function  last-locals)
-                    (setq last-locals nil)
-                    (setq last-function (third binding)))
-        else
-          do (setq last-locals bindings)))
+  (flet ((stack-to-list (stack)
+             (coerce (#"toArray" stack) 'list)))
+    (loop for bindings in (mapcar 'sys::environment-parts
+                                  (stack-to-list (jss:get-java-field thread "envStack" t)))
+          with last-locals
+          with last-function
+          for binding = (car bindings)
+          if (eq (second binding) nil)
+            collect (prog1
+                        (list last-function  last-locals)
+                      (setq last-locals nil)
+                      (setq last-function (third binding)))
+          else
+            do (setq last-locals bindings))))
 
 ;; Now that we have the pairings of function-executing and lexicals we need
 ;; to associate each such function with the stack frame for it being
@@ -500,8 +503,6 @@ above have used annotate local functions"
 ;; first entry that has the required frame number.
 
 
-;; BEGIN use  :abcl-introspect/system
-(in-package :abcl-introspect/system)
 
 
 ;; find-locals still has debugging code in it which will be removed after
@@ -519,7 +520,7 @@ above have used annotate local functions"
 Added by ABCL-INTROSPECT."
   (let ((thread (jss:get-java-field (nth index backtrace) "thread" t)))
     (and *debugging-locals-p* (print `(:collapse ,thread ,index)))
-    (let((collapsed (collapse-locals thread)))
+    (let ((collapsed (collapse-locals thread)))
       (and *debugging-locals-p* (map nil 'print collapsed))
       (let ((alignment 
               (loop for function-local-association in (reverse collapsed)
