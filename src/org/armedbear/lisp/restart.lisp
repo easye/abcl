@@ -68,28 +68,28 @@
 
 (defun map-restarts (fn condition call-test-p)
   (let ((associated ())
-	(other ()))
+        (other ()))
     (dolist (alist *condition-restarts*)
       (if (eq (car alist) condition)
-	  (setq associated (cdr alist))
-	  (setq other (append (cdr alist) other))))
+          (setq associated (cdr alist))
+          (setq other (append (cdr alist) other))))
     (dolist (restart-cluster *restart-clusters*)
       (dolist (restart restart-cluster)
-	(when (and (or (not condition)
-		       (member restart associated)
-		       (not (member restart other)))
-		   (or (not call-test-p)
-		       (funcall (restart-test-function restart) condition)))
-	  (funcall fn restart))))))
+        (when (and (or (not condition)
+                       (member restart associated)
+                       (not (member restart other)))
+                   (or (not call-test-p)
+                       (funcall (restart-test-function restart) condition)))
+          (funcall fn restart))))))
 
 
 (defun restart-report (restart stream)
   (funcall (or (restart-report-function restart)
-	       (let ((name (restart-name restart)))
-		 (lambda (stream)
-		   (if name (%format stream "~S" name)
-		       (%format stream "~S" restart)))))
-	   stream))
+               (let ((name (restart-name restart)))
+                 (lambda (stream)
+                   (if name (%format stream "~S" name)
+                       (%format stream "~S" restart)))))
+           stream))
 
 (defun print-restart (restart stream)
   (if *print-escape*
@@ -106,20 +106,20 @@
 (defun find-restart-or-control-error (identifier &optional condition)
   (or (find-restart identifier condition)
       (error 'control-error
-	     :format-control "Restart ~S is not active."
-	     :format-arguments (list identifier))))
+             :format-control "Restart ~S is not active."
+             :format-arguments (list identifier))))
 
 (defun invoke-restart (restart &rest values)
   (let ((real-restart
-	  (if (restart-p restart)
-	      (catch 'found
-		(map-restarts (lambda(r) (when (eq r restart)
-					   (throw 'found r)))
-			      nil nil)
-		(error 'control-error
-		       :format-control "Restart ~S is not active."
-		       :format-arguments (list restart)))
-	      (find-restart-or-control-error restart))))
+          (if (restart-p restart)
+              (catch 'found
+                (map-restarts (lambda(r) (when (eq r restart)
+                                           (throw 'found r)))
+                              nil nil)
+                (error 'control-error
+                       :format-control "Restart ~S is not active."
+                       :format-arguments (list restart)))
+              (find-restart-or-control-error restart))))
     (apply (restart-function real-restart) values)))
 
 (defun interactive-restart-arguments (real-restart)
@@ -130,17 +130,17 @@
 
 (defun invoke-restart-interactively (restart)
   (let* ((real-restart
-	   (if (restart-p restart)
-	       (catch 'found
-		 (map-restarts (lambda(r) (when (eq r restart)
-					    (throw 'found r)))
-			       nil nil)
-		 (error 'control-error
-			:format-control "Restart ~S is not active."
-			:format-arguments (list restart)))
-	       (find-restart-or-control-error restart)))
-	 (args (interactive-restart-arguments real-restart))
-	 )
+           (if (restart-p restart)
+               (catch 'found
+                 (map-restarts (lambda(r) (when (eq r restart)
+                                            (throw 'found r)))
+                               nil nil)
+                 (error 'control-error
+                        :format-control "Restart ~S is not active."
+                        :format-arguments (list restart)))
+               (find-restart-or-control-error restart)))
+         (args (interactive-restart-arguments real-restart))
+         )
     (apply (restart-function real-restart) args)))
 
 (defun parse-keyword-pairs (list keys)
@@ -189,9 +189,9 @@
 (defun munge-restart-case-expression (expression env)
   (let ((exp (macroexpand expression env)))
     (if (consp exp)
-	(let* ((name (car exp))
-	       (args (if (eq name 'cerror) (cddr exp) (cdr exp))))
-	  (if (member name '(SIGNAL ERROR CERROR WARN))
+        (let* ((name (car exp))
+               (args (if (eq name 'cerror) (cddr exp) (cdr exp))))
+          (if (member name '(SIGNAL ERROR CERROR WARN))
               (let ((n-cond (gensym)))
                 `(let ((,n-cond (coerce-to-condition ,(first args)
                                                      (list ,@(rest args))
@@ -262,11 +262,11 @@
 (defmacro with-condition-restarts (condition-form restarts-form &body body)
   (let ((n-cond (gensym)))
     `(let ((*condition-restarts*
-	    (cons (let ((,n-cond ,condition-form))
-		    (cons ,n-cond
-			  (append ,restarts-form
-				  (cdr (assoc ,n-cond *condition-restarts*)))))
-		  *condition-restarts*)))
+            (cons (let ((,n-cond ,condition-form))
+                    (cons ,n-cond
+                          (append ,restarts-form
+                                  (cdr (assoc ,n-cond *condition-restarts*)))))
+                  *condition-restarts*)))
        ,@body)))
 
 (defun abort (&optional condition)
@@ -329,46 +329,46 @@
   (finish-output)
   ;; find all fbound symbols of same name
   (let ((alternatives  
-	  (let ((them nil))
-	    (dolist (package (list-all-packages))
-	      (let ((found (find-symbol (string name) package)))
-		(when (and (fboundp found) (not (member found them)))
-		  (push found them))))
-	    them)))
+          (let ((them nil))
+            (dolist (package (list-all-packages))
+              (let ((found (find-symbol (string name) package)))
+                (when (and (fboundp found) (not (member found them)))
+                  (push found them))))
+            them)))
     (let ((sys::*restart-clusters* sys::*restart-clusters*))
       ;; Build and add the restarts 
       (dolist (alt alternatives)
-	(let ((package (symbol-package alt)))
-	  (let ((alt alt) (package package))
-	    (push 
-	     (list
+        (let ((package (symbol-package alt)))
+          (let ((alt alt) (package package))
+            (push 
+             (list
               (system::make-restart :name
-				    (intern (concatenate 'string "USE-FROM-" (package-name package)))
-				    :function
-				    #'(lambda (&rest ignore)
-					(declare (ignore ignore))
-					(shadowing-import alt)
-					(setq name (symbol-function alt))
-					(return-from undefined-function-called (apply name arguments)))
-				    :report-function
-				    #'(lambda (stream)
-					(format stream "Import then use #'~a::~a instead" (string-downcase (package-name package)) alt))))
-	     sys::*restart-clusters*))))
+                                    (intern (concatenate 'string "USE-FROM-" (package-name package)))
+                                    :function
+                                    #'(lambda (&rest ignore)
+                                        (declare (ignore ignore))
+                                        (shadowing-import alt)
+                                        (setq name (symbol-function alt))
+                                        (return-from undefined-function-called (apply name arguments)))
+                                    :report-function
+                                    #'(lambda (stream)
+                                        (format stream "Import then use #'~a::~a instead" (string-downcase (package-name package)) alt))))
+             sys::*restart-clusters*))))
       (loop
-	(restart-case
-	    (error 'undefined-function :name name)
-	  (continue ()
-	    :report "Try again.")
-	  (use-value (value)
-	    :report "Specify a function to call instead."
-	    :interactive query-function
-	    (return-from undefined-function-called
-	      (apply value arguments)))
-	  (return-value (&rest values)
-	    :report (lambda (stream)
-		      (format stream "Return one or more values from the call to ~S." name))
-	    :interactive query-function
-	    (return-from undefined-function-called
-	      (values-list values)))))
+        (restart-case
+            (error 'undefined-function :name name)
+          (continue ()
+            :report "Try again.")
+          (use-value (value)
+            :report "Specify a function to call instead."
+            :interactive query-function
+            (return-from undefined-function-called
+              (apply value arguments)))
+          (return-value (&rest values)
+            :report (lambda (stream)
+                      (format stream "Return one or more values from the call to ~S." name))
+            :interactive query-function
+            (return-from undefined-function-called
+              (values-list values)))))
       (when (fboundp name)
-	(return-from undefined-function-called (apply name arguments))))))
+        (return-from undefined-function-called (apply name arguments))))))
