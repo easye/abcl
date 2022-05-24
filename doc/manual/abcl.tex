@@ -118,14 +118,14 @@ such artifacts.}.
 %%Preface to the Tenth edition, abcl-1.9.0
 \subsection{Preface to the Tenth Edition}
 
-For the Tenth edition, we have explicitly tested the stable, Long Term
-Support (``LTS'') versions of the \textsc{OpenJDK}, namely
-\textsc{openjdk8}, \textsc{openjdk11}, and \textsc{openjdk17}.  We
-intend to drop one or more of these platforms for the next edition in
-order to more completely overhaul the implementations use of compare
-and swap on memory originally allocated outside the hosting
-\textsc{JVM}.  As such, the Tenth edition is built for release with
-openjdk8 but should run best on \textsc{openjdk17}.
+For the Tenth edition, we have prioritized testing our developments
+with the stable Long Term Support (``LTS'') versions of the
+\textsc{OpenJDK}, namely \textsc{openjdk8}, \textsc{openjdk11}, and
+\textsc{openjdk17}.  We intend to drop one or more of these platforms
+for the next edition in order to more completely overhaul the
+implementations use of compare and swap on memory originally allocated
+outside the hosting \textsc{JVM}.  As such, the Tenth edition is built
+for release with openjdk8 but should run best on \textsc{openjdk17}.
 
 \chapter{Introduction}
 
@@ -465,8 +465,8 @@ calls. The code above corresponds to the following Lisp code:
 
 \begin{listing-lisp}
 (let ((jar (jnew "java.util.zip.ZipFile" "/path/to/some.jar")))
-  (let ((els (jcall "entries" jar)))
-    (jcall "hasMoreElements" els)))
+  (let ((entries (jcall "entries" jar)))
+    (jcall "hasMoreElements" entries)))
 \end{listing-lisp}
 
 except that the dynamic dispatch part is not shown.
@@ -1394,7 +1394,6 @@ the class you wish to specialize on, one needs to specify the
 classloader as an optional third argument.
 
 \begin{listing-lisp}
-
 (defparameter *other-classloader*
   (jcall "getBaseLoader" cl-user::*classpath-manager*))
   
@@ -1969,9 +1968,9 @@ abcl-1.7.1 as a maintenance release in July 2020.
 
 We released abcl-1.8.0 under the darkening storms of October 2020.
 
-Halfway through the $\pi$ $\alpha$ $\nu$ $\delta$ $\eta$ $\mu$ o
-$\zeta$ \cite{pandemos}, we dyslexic worker bears untied abcl-1.9.0
-into the future.
+Halfway through the $\pi$$\alpha$$\nu$$\delta$$\eta$$\mu$o$\zeta$
+\cite{pandemos}, we dyslexic worker bears untied abcl-1.9.0 into the
+future.
 
 \appendix 
 
@@ -1982,7 +1981,7 @@ into the future.
 \chapter{The SYSTEM Dictionary}
 
 The public interfaces in this package are subject to change with
-\textsc{ABCL} 1.9
+\textsc{ABCL} 2.0
 
 \include{system}
 
