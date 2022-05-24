@@ -23,7 +23,7 @@
   dc:modified          "25-MAY-2022" ;
   dc:version           "abcl-1.9.0" ;
 #  dc:release           "dev" ; # uncomment when release is finished
-  dc:release           "rc-3" ;
+  dc:release           "rc-4" ;
   abcl:git             <https://github.com/armedbear/abcl/> ;
   abcl:git             <https://gitlab.common-lisp.net/abcl/abcl/> ;
   abcl:svn             <https://abcl.org/svn/trunk/abcl/> . 
