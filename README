@@ -57,7 +57,7 @@ to get something like
     Using VM: OpenJDK 64-Bit Server VM
 
     Armed Bear Common Lisp 1.9.0
-    Java 17.0.2 Oracle Corporation
+    Java 17.0.3 Oracle Corporation
     OpenJDK 64-Bit Server VM
     Low-level initialization completed in 0.952 seconds.
     Startup completed in 4.248 seconds.
@@ -96,7 +96,7 @@ To start ABCL, simply issue the following command:
 which should result in output like the following
 
     Armed Bear Common Lisp 1.9.0
-    Java 17.0.2 OpenJDK Porters Group
+    Java 17.0.3 OpenJDK Porters Group
     OpenJDK 64-Bit Server VM
     Low-level initialization completed in 0.107 seconds.
     Startup completed in 0.493 seconds.
