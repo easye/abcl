@@ -711,6 +711,9 @@ in Java CLASSPATH representation."
      "metadataResolving"
      #'log)))
 
+(defgeneric resolve (uri)
+  (:documentation "Resolve URI as Maven artifacts"))
+
 (defmethod resolve ((string string))
   "Resolve a colon separated GROUP-ID:ARTIFACT-ID[:VERSION] reference to a Maven artifact.
 
@@ -740,7 +743,9 @@ artifact and all of its transitive dependencies."
                                 `(:version ,version))
                               (when repository
                                 `(:repository ,repository))))))))))
-
+(defmethod resolve :around ((uri t))
+  (java:with-classloader (java:get-default-classloader)
+    (call-next-method uri)))
 
 ;;; Currently the last file listed in ASDF
 (provide 'abcl-asdf)
