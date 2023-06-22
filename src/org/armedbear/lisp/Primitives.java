@@ -1166,7 +1166,7 @@ public final class Primitives {
         }
     };
 
-    // ### nconc
+    // ### nconc &rest lists
     private static final Primitive NCONC = new pf_nconc();
     private static final class pf_nconc extends Primitive {
         pf_nconc() {
@@ -1222,11 +1222,13 @@ public final class Primitives {
                             splice = (Cons) list;
                         list = splice.cdr;
                     }
-                } else
+                } else {
                     type_error(list, Symbol.LIST);
+                }
             }
-            if (result == null)
+            if (result == null) {
                 return array[i];
+            }
             splice.cdr = array[i];
             return result;
         }

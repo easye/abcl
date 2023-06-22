@@ -39,7 +39,8 @@
          (temp ret-list))
     (do ((res nil)
          (args '() '()))
-        ((dolist (x arglists nil) (if (null x) (return t)))
+        ((dolist (x arglists nil)
+           (when (null x) (return t)))
          (if accumulate
              (cdr ret-list)
              (car original-arglists)))
@@ -54,6 +55,13 @@
                (setq temp (cdr temp)))))))
 
 (defun mapcan (function list &rest more-lists)
+  (unless (consp list)
+    (error 'type-error :datum list :expected-type 'cons))
+  (when more-lists
+    (dolist (list more-lists)
+      (unless (consp list)
+        (error 'type-error :datum list :expected-type 'cons))))
+  (break)
   (map1 function (cons list more-lists) :nconc t))
 
 (defun mapl (function list &rest more-lists)
