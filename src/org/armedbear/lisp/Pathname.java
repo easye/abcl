@@ -145,6 +145,17 @@ public class Pathname extends LispObject
     return this;
   }
 
+  /** One of the keywords :LOCAL or :COMMON */
+  protected LispObject _case = NIL;
+  public LispObject getCase() {
+    return _case;
+  }
+
+  public Pathname setCase(LispObject _case) {
+    this._case = _case;
+    return this;
+  }
+
   /** 
    * The path component separator used by internally generated
    * path namestrings.
@@ -462,7 +473,8 @@ public class Pathname extends LispObject
                  new Cons("DIRECTORY", getDirectory()),
                  new Cons("NAME", getName()),
                  new Cons("TYPE", getType()),
-                 new Cons("VERSION", getVersion()));
+                 new Cons("VERSION", getVersion()),
+                 new Cons("CASE", getCase()));
         return parts; 
     }
 
@@ -1100,6 +1112,7 @@ public class Pathname extends LispObject
         LispObject name = NIL;
         LispObject type = NIL;
         LispObject version = NIL;
+        LispObject _case = NIL;
         Pathname defaults = null;
         boolean hostSupplied = false;
         boolean deviceSupplied = false;
@@ -1107,6 +1120,7 @@ public class Pathname extends LispObject
         boolean typeSupplied = false;
         boolean directorySupplied = false;
         boolean versionSupplied = false;
+        boolean _caseSupplied = false;
         for (int i = 0; i < args.length; i += 2) {
             LispObject key = args[i];
             LispObject value = args[i + 1];
@@ -1163,7 +1177,10 @@ public class Pathname extends LispObject
             } else if (key == Keyword.DEFAULTS) {
                 defaults = coerceToPathname(value);
             } else if (key == Keyword.CASE) {
-                // Ignored.
+              Pathname.checkCaseArgument(value); // possible non-local exit
+              
+              _case = value;
+              _caseSupplied = true;
             }
         }
         if (defaults != null) {
