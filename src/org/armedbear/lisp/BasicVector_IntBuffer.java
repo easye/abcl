@@ -71,8 +71,8 @@ public final class BasicVector_IntBuffer
       elements = IntBuffer.allocate(capacity);
     }
     for (int i = array.length; i-- > 0;) {
-      // FIXME: if  LispObeject is a number that can't fit into an int
-      elements.put(i, (int)(array[i].longValue() & 0xffffffffL));  
+      // FIXME: if  LispObject is a number that can't fit into an int
+      elements.put(i, coerceToJavaUnsignedInt(array[i]));
     }
   }
 
@@ -145,7 +145,7 @@ public final class BasicVector_IntBuffer
   @Override
   public LispObject elt(int index) {
     try {
-      return number(((long)elements.get(index)) & 0xffffffffL);
+      return number(coerceToJavaUnsignedInt(elements.get(index)));
     } catch (IndexOutOfBoundsException e) {
       badIndex(index, capacity);
       return NIL; // Not reached.
@@ -156,7 +156,7 @@ public final class BasicVector_IntBuffer
   public int aref(int index) {
     try {
       // FIXME: this shouldn't be used?  
-      return number(((long)elements.get(index)) & 0xffffffffL).intValue(); 
+      return number(coerceToJavaUnsignedInt(elements));
     } catch (IndexOutOfBoundsException e) {
       badIndex(index, ((java.nio.Buffer)elements).limit()); 
       return -1; // Not reached.
@@ -176,7 +176,7 @@ public final class BasicVector_IntBuffer
   @Override
   public LispObject AREF(int index) {
     try {
-      return number(((long)elements.get(index)) & 0xffffffffL);
+      return number(coerceToJavaUnsignedInt(elements.get(index)));
     } catch (IndexOutOfBoundsException e) {
       badIndex(index, ((java.nio.Buffer)elements).limit());
       return NIL; // Not reached.
@@ -186,10 +186,11 @@ public final class BasicVector_IntBuffer
   @Override
   public void aset(int index, LispObject newValue) {
     try {
-      if (newValue.isLessThan(Fixnum.ZERO) || newValue.isGreaterThan(UNSIGNED_BYTE_32_MAX_VALUE)) {
+      if (newValue.isLessThan(Fixnum.ZERO)
+          || newValue.isGreaterThan(UNSIGNED_BYTE_32_MAX_VALUE)) {
         type_error(newValue, UNSIGNED_BYTE_32);
       }
-      elements.put(index, (int)(newValue.longValue() & 0xffffffffL));
+      elements.put(index, coerceToJavaUnsignedInt(newValue));
     } catch (IndexOutOfBoundsException e) {
       badIndex(index, capacity);
     }
@@ -221,7 +222,8 @@ public final class BasicVector_IntBuffer
       type_error(obj, UNSIGNED_BYTE_32);
     }
     for (int i = capacity; i-- > 0;) {
-      elements.put(i, (int)(obj.longValue() & 0xffffffffL));
+      int value = coerceToJavaUnsignedInt(obj);
+      elements.put(i, coerceToJavaUnsignedInt(obj));
     }
   }
 
@@ -271,29 +273,49 @@ public final class BasicVector_IntBuffer
                                     LispObject initialElement,
                                     LispObject initialContents) {
     if (initialContents != null) {
-      LispObject[] newElements = new LispObject[newCapacity];
+      IntBuffer newElements;
+      if (directAllocation) {
+        ByteBuffer b = ByteBuffer.allocateDirect(newCapacity * 4);
+        newElements = b.asIntBuffer();
+      } else {
+        newElements = IntBuffer.allocate(newCapacity);
+      }
       if (initialContents.listp()) {
         LispObject list = initialContents;
         for (int i = 0; i < newCapacity; i++) {
-          newElements[i] = list.car();
+          newElements.put(i, corceToJavaUnsignedInt(list.car()));
           list = list.cdr();
         }
       } else if (initialContents.vectorp()) {
         for (int i = 0; i < newCapacity; i++) {
-          newElements[i] = initialContents.elt(i);
+          newElements.put(i, coerceToJavaUnsignedInt(initialContents.elt(i)));
         }
       } else {
         type_error(initialContents, Symbol.SEQUENCE);
       }
       return new BasicVector_IntBuffer(newElements, directAllocation);
     }
-    if (capacity != newCapacity) {
-      LispObject[] newElements = new LispObject[newCapacity];
-      System.arraycopy(elements.array(), 0, newElements, 0,
-                       Math.min(capacity, newCapacity));
+    if (length() != newCapacity) {
+      IntBuffer newElements;
+      if (directAllocation) {
+        ByteBuffer b = ByteBuffer.allocateDirect(newCapacity * 4);
+        newElements = b.asIntBuffer();
+      } else {
+        newElements = IntBuffer.allocate(newCapacity);
+      }
+
+      if (elements.hasArray()) {
+        newElements.put(elements.array(), 0, Math.min(length(), newCapacity));
+      } else {
+        int limit = Math.min(length(), newCapacity);
+        for (int i = 0; i < limit; i++) {
+          newElements.put(i, elements.get(i));
+        }
+      }
       if (initialElement != null) {
+        int initValue = coerceToJavaUnsignedInt(initialElement);
         for (int i = capacity; i < newCapacity; i++) {
-          newElements[i] = initialElement;
+          newElements.put(i, initValue);
         }
       }
       return new BasicVector_IntBuffer(newElements, directAllocation);
@@ -304,8 +326,8 @@ public final class BasicVector_IntBuffer
 
   @Override
   public AbstractVector adjustArray(int newCapacity,
-                                     AbstractArray displacedTo,
-                                     int displacement) {
+                                    AbstractArray displacedTo,
+                                    int displacement) {
     return new ComplexVector(newCapacity, displacedTo, displacement);
   }
 
