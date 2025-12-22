@@ -35,7 +35,9 @@ package org.armedbear.lisp;
 
 import static org.armedbear.lisp.Lisp.*;
 
-public class Symbol extends LispObject implements java.io.Serializable
+public class Symbol
+  extends LispObjectReference
+  implements java.io.Serializable
 {
   // Bit flags.
   private static final int FLAG_SPECIAL           = 0x0001;
