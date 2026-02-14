@@ -1,0 +1,25 @@
+#+title: Notes on running the ANSI-TEST Suite
+
+
+#+begin_src lisp :results verbatim append
+  (asdf:make :abcl/test/ansi/compiled)
+  (setf rt::*compile-tests* t)
+  (abcl.test.ansi:load-tests)
+#+end_src
+
+#+RESULTS:
+: T
+
+#+begin_src lisp :results verbatim append
+(gcl-ansi:do-tests-matching "etypecase")
+#+end_src
+
+#+RESULTS:
+: T
+
+
+
+* TODO The namespace of this packaging is very confused
+
+the package is ABCL.TEST.ANSI (nicknamed GCL-ANSI).
+
