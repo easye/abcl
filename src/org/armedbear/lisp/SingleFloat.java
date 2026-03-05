@@ -93,19 +93,23 @@ public final class SingleFloat extends LispObject
     @Override
     public LispObject typep(LispObject typeSpecifier)
     {
+        if (typeSpecifier == Symbol.SHORT_FLOAT)
+            return T;
+        if (typeSpecifier == Symbol.SINGLE_FLOAT)
+            return T;
         if (typeSpecifier == Symbol.FLOAT)
             return T;
         if (typeSpecifier == Symbol.REAL)
             return T;
         if (typeSpecifier == Symbol.NUMBER)
             return T;
-        if (typeSpecifier == Symbol.SINGLE_FLOAT)
-            return T;
-        if (typeSpecifier == Symbol.SHORT_FLOAT)
+        if (typeSpecifier == BuiltInClass.SINGLE_FLOAT)
             return T;
         if (typeSpecifier == BuiltInClass.FLOAT)
             return T;
-        if (typeSpecifier == BuiltInClass.SINGLE_FLOAT)
+        if (typeSpecifier == BuiltInClass.REAL)
+            return T;
+        if (typeSpecifier == BuiltInClass.NUMBER)
             return T;
         return super.typep(typeSpecifier);
     }
