@@ -23,6 +23,7 @@
                              (:test-file "print-symbol")
                              (:test-file "read-suppress")
                              (:test-file "run-program")
+			     (:test-file "struct")
                              (:test-file "url-stream")
                              (:test-file "without-use-cl")))))
 
