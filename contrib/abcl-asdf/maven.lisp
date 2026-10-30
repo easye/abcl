@@ -366,6 +366,8 @@ hint."
 
 (defun find-service-locator ()
   (or
+   (ignore-errors ;; maven-3.10.0
+    (#"newSession" 'org.apache.maven.repository.internal.MavenRepositorySystemUtils))
    (ignore-errors
      ;; maven-3.0.4
      (jss:new "org.apache.maven.repository.internal.MavenServiceLocator")) 
@@ -383,16 +385,18 @@ hint."
   (unless *init-p* (init))
   (let ((locator 
          (find-service-locator))
-        (wagon-provider-class 
-         (or
-          (ignore-errors 
-            (java:jclass "org.sonatype.aether.connector.wagon.WagonProvider"))
-          (ignore-errors ;; Maven-3.3.x
-            (jss:find-java-class 'connector.transport.TransporterFactory))
-          (ignore-errors ;; Maven-3.2.5
-            (jss:find-java-class 'org.eclipse.aether.transport.wagon.WagonProvider))
-          (ignore-errors  ;; Maven-3.1.x 
-            (jss:find-java-class 'aether.connector.wagon.WagonProvider))))
+	(wagon-provider-class
+	  (or
+	   (ignore-errors ;; maven-3.10.0
+	    (java:jclass "org.eclipse.aether.transport.wagon.WagonTransporterFactory"))
+	   (ignore-errors
+	    (java:jclass "org.sonatype.aether.connector.wagon.WagonProvider"))
+	   (ignore-errors ;; Maven-3.3.x
+	    (jss:find-java-class 'connector.transport.TransporterFactory))
+	   (ignore-errors ;; Maven-3.2.5
+	    (jss:find-java-class 'org.eclipse.aether.transport.wagon.WagonProvider))
+	   (ignore-errors  ;; Maven-3.1.x
+			   (jss:find-java-class 'aether.connector.wagon.WagonProvider))))
         (wagon-repository-connector-factory-class
          (or
           (ignore-errors 
